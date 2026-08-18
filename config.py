@@ -3,14 +3,17 @@ import certifi
 
 
 class Config:
+
     # =========================
     # MongoDB
     # =========================
 
     MONGO_URI = os.getenv("MONGO_URI")
 
-    # Database name
-    DB_NAME = os.getenv("DB_NAME", "sagar_hotel")
+    DB_NAME = os.getenv(
+        "DB_NAME",
+        "sagar_hotel"
+    )
 
     # =========================
     # Flask
@@ -22,20 +25,39 @@ class Config:
     )
 
     # =========================
-    # Upload Folder
+    # Server
     # =========================
 
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    HOST = os.getenv(
+        "HOST",
+        "0.0.0.0"
+    )
+
+    PORT = int(
+        os.getenv(
+            "PORT",
+            "5000"
+        )
+    )
+
+    DEBUG = os.getenv(
+        "DEBUG",
+        "False"
+    ).lower() == "true"
+
+    # =========================
+    # Paths
+    # =========================
+
+    BASE_DIR = os.path.dirname(
+        os.path.abspath(__file__)
+    )
 
     UPLOAD_FOLDER = os.path.join(
         BASE_DIR,
         "static",
         "uploads"
     )
-
-    # =========================
-    # QR Code Folder
-    # =========================
 
     QRCODE_FOLDER = os.path.join(
         BASE_DIR,
@@ -50,9 +72,12 @@ class Config:
     MONGO_OPTIONS = {
         "tls": True,
         "tlsCAFile": certifi.where(),
+
+        # Serverless-friendly timeouts
         "serverSelectionTimeoutMS": 10000,
         "connectTimeoutMS": 20000,
         "socketTimeoutMS": 20000,
+
         "retryWrites": True,
         "retryReads": True
     }
