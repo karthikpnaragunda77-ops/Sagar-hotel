@@ -1,0 +1,109 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Tables & QR Codes{% endblock %}
+{% block page_title %}Hotel Tables & Smart QR Ordering Setup{% endblock %}
+
+{% block content %}
+
+<!-- Header & Add Table Button -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Each QR code is uniquely linked to a hotel table. Customers scanning the QR code will have their table number bound to their orders automatically.
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem;">
+    <button type="button" class="btn btn-outline" onclick="window.print()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      <span>Print All QR Stands 🖨️</span>
+    </button>
+    <button type="button" class="btn btn-primary" onclick="openAddTableModal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <span>+ Add Hotel Table</span>
+    </button>
+  </div>
+</div>
+
+<!-- Tables Grid (Screen View & Printable) -->
+<div class="tables-grid printable-qr-section">
+  {% for table in tables %}
+    <div class="table-card">
+      <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+        <span class="table-pill" style="font-size: 0.95rem;">
+          Table #{{ table.table_number }}
+        </span>
+        <span class="badge {% if table.status == 'occupied' %}badge-status-preparing{% else %}badge-veg{% endif %}">
+          {{ table.status|capitalize }}
+        </span>
+      </div>
+
+      <!-- Generated QR Code Image -->
+      <img src="{{ table.qr_code_path }}" alt="QR Code for Table {{ table.table_number }}" class="table-qr-img">
+
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        Capacity: <strong>{{ table.capacity or 4 }} Guests</strong>
+      </div>
+
+      <div class="no-print" style="display: flex; gap: 0.5rem; width: 100%; margin-top: 0.5rem;">
+        <a href="{{ table.qr_code_path }}" download="Table_{{ table.table_number }}_QR.png" class="btn btn-sm btn-outline btn-block" title="Download QR image">
+          💾 Download
+        </a>
+        <a href="{{ url_for('user.table_landing', table_number=table.table_number) }}" target="_blank" class="btn btn-sm btn-primary btn-block" title="Test QR Scan">
+          ↗ Test Scan
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Add Table Modal -->
+<div id="add-table-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title">Add New Hotel Table</h3>
+      <button type="button" class="modal-close" onclick="closeAddTableModal()">×</button>
+    </div>
+    <form action="{{ url_for('admin.add_table') }}" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="add-table-num">Table Number <span style="color: var(--danger);">*</span></label>
+          <input type="number" id="add-table-num" name="table_number" class="form-control" placeholder="e.g. 11" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="add-table-cap">Seating Capacity</label>
+          <select id="add-table-cap" name="capacity" class="form-select">
+            <option value="2">2 Seater (Couple Table)</option>
+            <option value="4" selected>4 Seater (Standard Family)</option>
+            <option value="6">6 Seater (Large Group)</option>
+            <option value="8">8 Seater (Banquet)</option>
+          </select>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          A unique high-resolution branded QR code will be generated and saved to MongoDB instantly.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeAddTableModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Generate Table & QR Code ⚡</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openAddTableModal() {
+    const m = document.getElementById('add-table-modal');
+    if (m) m.classList.add('active');
+  }
+  function closeAddTableModal() {
+    const m = document.getElementById('add-table-modal');
+    if (m) m.classList.remove('active');
+  }
+</script>
+{% endblock %}

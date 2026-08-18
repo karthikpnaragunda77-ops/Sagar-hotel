@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Sagar Hotel Hampi{% endblock %} | Morning Delights</title>
+  <meta name="description" content="Order fresh, authentic morning breakfast directly from your table using Smart QR Ordering. Idli, Dosa, Poori, Vada, and Combos!">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{{ url_for('user.menu_view') }}" class="brand-logo">
+          <img
+              src="{{ url_for('static', filename='images/sagar.png') }}"
+              alt="Sagar Hotel Hampi"
+              class="brand-logo-img" style="height: 35px; width: auto; object-fit: contain;"
+          >
+
+          <span>
+              SagarHotel<span class="highlight">Hampi</span>
+          </span>
+      </a>
+
+      <div class="header-nav">
+        <!-- Table Indicator if seated -->
+        {% if current_table %}
+          <div class="table-pill" title="Seated at Table {{ current_table }}">
+            <span class="dot"></span>
+            <span>Table #{{ current_table }}</span>
+            <a href="{{ url_for('user.clear_table') }}" style="color: #92400E; margin-left: 4px; font-weight: bold;" title="Change Table">✕</a>
+          </div>
+        {% else %}
+          <button type="button" class="btn btn-sm btn-outline" onclick="openTableSelectorModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span class="nav-text">Select Table</span>
+          </button>
+        {% endif %}
+
+        <a href="{{ url_for('user.menu_view') }}" class="nav-link {% if request.endpoint == 'user.menu_view' %}active{% endif %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-text">Menu</span>
+        </a>
+
+        {% if user_logged_in %}
+          <a href="{{ url_for('user.order_history_view') }}" class="nav-link {% if request.endpoint == 'user.order_history_view' %}active{% endif %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span class="nav-text">Orders</span>
+          </a>
+          <a href="{{ url_for('auth.user_logout') }}" class="nav-link" title="Logout {{ user_name }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span class="nav-text">Logout ({{ user_name.split()[0] }})</span>
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.user_login') }}" class="nav-link {% if request.endpoint == 'auth.user_login' %}active{% endif %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span class="nav-text">Login</span>
+          </a>
+        {% endif %}
+
+        <!-- Cart Button -->
+        <a href="{{ url_for('user.cart_view') }}" class="btn btn-primary btn-sm" id="header-cart-btn" style="position: relative;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="nav-text">Cart</span>
+          <span class="cart-badge-count badge badge-veg" style="display: none; background: #FFFFFF; color: var(--primary); font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 9999px;">0</span>
+        </a>
+
+        <!-- Quick Admin Portal Link -->
+        <a href="{{ url_for('auth.admin_login') }}" class="btn btn-sm btn-outline" style="border-style: dashed;" title="Hotel Staff & Kitchen Login">
+          <span class="nav-text">Admin</span> 🔐
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash Message Container -->
+  <div class="container flash-messages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main View Block -->
+  <main style="flex: 1;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Floating Sticky Cart Bar -->
+  <div id="floating-cart-bar" class="floating-cart-bar">
+    <div class="cart-summary-text">
+      <span id="floating-cart-count" class="cart-items-count">0 items</span>
+      <span id="floating-cart-total" class="cart-total-price">₹0.00</span>
+    </div>
+    <a href="{{ url_for('user.cart_view') }}" class="btn btn-primary">
+      <span>View Cart & Checkout</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </a>
+  </div>
+
+  <!-- Manual Table Selector Modal -->
+  <div id="table-selector-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Your Table</h3>
+        <button type="button" class="modal-close" onclick="closeTableSelectorModal()">×</button>
+      </div>
+      <form action="{{ url_for('user.set_table') }}" method="POST">
+        <div class="modal-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+            If you scanned a table QR code, your table is attached automatically. Otherwise, please enter or select your table number:
+          </p>
+          <div class="form-group">
+            <label class="form-label" for="manual-table-num">Table Number (1 - 20)</label>
+            <input type="number" id="manual-table-num" name="table_number" class="form-control" min="1" max="50" required placeholder="e.g. 3">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeTableSelectorModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Table</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 2rem 0; margin-top: auto;">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.875rem; color: var(--text-muted);">
+      <div>
+        <strong>Smart Breakfast Hotel</strong> — Fast & Fresh Morning Dine-In Ordering
+      </div>
+      <div>
+        <a href="{{ url_for('auth.admin_login') }}" style="color: var(--text-muted); text-decoration: underline;">Staff / Kitchen Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+  <script>
+    function openTableSelectorModal() {
+      const m = document.getElementById('table-selector-modal');
+      if (m) m.classList.add('active');
+    }
+    function closeTableSelectorModal() {
+      const m = document.getElementById('table-selector-modal');
+      if (m) m.classList.remove('active');
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

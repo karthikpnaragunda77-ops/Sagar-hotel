@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Table #{{ table_number }}{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding-top: 3.5rem; padding-bottom: 5rem; text-align: center;">
+  <div class="card" style="padding: 3rem 2rem; box-shadow: var(--shadow-xl); border-radius: var(--radius-xl); background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 30%);">
+    
+    <div style="width: 80px; height: 80px; background: #FEF3C7; color: #D97706; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 2px dashed #F59E0B;">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01"/></svg>
+    </div>
+
+    <div class="table-pill" style="font-size: 1.1rem; padding: 0.5rem 1.5rem; margin-bottom: 1.25rem;">
+      <span class="dot"></span>
+      <span>TABLE #{{ table_number }} CONFIRMED</span>
+    </div>
+
+    <h1 class="brand-font" style="font-size: 2.2rem; color: #78350F; margin-bottom: 0.5rem;">
+      Welcome to Smart Breakfast Hotel!
+    </h1>
+    
+    <p style="color: #92400E; font-size: 1.05rem; max-width: 480px; margin: 0 auto 2rem; line-height: 1.6;">
+      Your table has been automatically linked. Choose your favorites and our chefs will start cooking immediately.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 320px; margin: 0 auto;">
+      <a href="{{ url_for('user.menu_view') }}" class="btn btn-primary btn-lg" style="font-weight: 700;">
+        Browse Breakfast Menu 🥞
+      </a>
+      
+      {% if not user_logged_in %}
+        <a href="{{ url_for('auth.user_login') }}" class="btn btn-outline btn-sm">
+          Sign In to Account (Optional)
+        </a>
+      {% endif %}
+    </div>
+
+    <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: center; gap: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+      <div>⚡ Fast Prep (~10 mins)</div>
+      <div>🍳 100% Fresh & Authentic</div>
+      <div>🔔 Live Status Tracking</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

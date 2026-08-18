@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Your Breakfast Cart{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('user.menu_view') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-bottom: 0.5rem;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <span>Back to Menu</span>
+    </a>
+    <h1 class="brand-font" style="font-size: 2.2rem;">Your Breakfast Cart 🛒</h1>
+  </div>
+
+  <!-- Empty State -->
+  <div id="cart-empty-state" class="card" style="text-align: center; padding: 4rem 1.5rem; display: none;">
+    <div style="font-size: 3.5rem; margin-bottom: 1rem;">🍽️</div>
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Your Cart is Empty</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Looks like you haven't selected any breakfast favorites yet.</p>
+    <a href="{{ url_for('user.menu_view') }}" class="btn btn-primary btn-lg">
+      Browse Hot Breakfast Menu 🥞
+    </a>
+  </div>
+
+  <!-- Cart Content Grid -->
+  <div id="cart-content-wrapper" class="cart-layout">
+    <!-- Left Column: Items List -->
+    <div class="card" style="padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.25rem;">Selected Dishes</h3>
+        <button type="button" class="btn btn-sm btn-outline" onclick="if(confirm('Clear all items from cart?')) Cart.clear();">
+          Clear Cart
+        </button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="cart-items-table">
+          <thead>
+            <tr>
+              <th>Dish</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cart-items-tbody">
+            <!-- Populated dynamically by cart.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Special Cooking Notes -->
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <label class="form-label" for="order-special-notes">
+          🧑‍🍳 Special Instructions for Kitchen (Optional)
+        </label>
+        <textarea id="order-special-notes" class="form-control" placeholder="e.g. Extra crispy dosa, separate sambar bowl, filter coffee medium sweet..."></textarea>
+      </div>
+    </div>
+
+    <!-- Right Column: Order Summary & Checkout -->
+    <div class="card" style="padding: 1.75rem; height: fit-content;">
+      <h3 style="font-size: 1.25rem; margin-bottom: 1.25rem;">Order & Table Details</h3>
+
+      <!-- Table Selection -->
+      <div class="form-group">
+        <label class="form-label" for="order-table-number">
+          📍 Dine-In Table Number <span style="color: var(--danger);">*</span>
+        </label>
+        <select id="order-table-number" class="form-select" required>
+          <option value="" disabled {% if not current_table %}selected{% endif %}>Select your table number...</option>
+          {% for tbl in all_tables %}
+            <option value="{{ tbl.table_number }}" {% if current_table == tbl.table_number %}selected{% endif %}>
+              Table #{{ tbl.table_number }} (Seats {{ tbl.capacity }})
+            </option>
+          {% endfor %}
+          {% if not all_tables %}
+            {% for n in range(1, 16) %}
+              <option value="{{ n }}" {% if current_table == n %}selected{% endif %}>Table #{{ n }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+        <small style="color: var(--text-muted); font-size: 0.8rem;">
+          Scanned a QR code? Your table is already selected!
+        </small>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="form-group">
+        <label class="form-label" for="order-customer-name">Your Name</label>
+        <input type="text" id="order-customer-name" class="form-control" value="{{ user_name or '' }}" placeholder="e.g. Arjun Sharma">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="order-customer-phone">Mobile Number (For receipt)</label>
+        <input type="tel" id="order-customer-phone" class="form-control" value="{{ session.get('user_phone', '') }}" placeholder="e.g. 9876543210">
+      </div>
+
+      <!-- Cost Breakdown -->
+      <div style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Subtotal</span>
+          <span id="cart-subtotal" style="font-weight: 600;">₹0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">GST (0%)</span>
+          <span id="cart-tax" style="font-weight: 600;">₹0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; color: var(--secondary); margin-top: 0.5rem;">
+          <span>Total Amount</span>
+          <span id="cart-total" style="color: var(--primary);">₹0.00</span>
+        </div>
+      </div>
+
+      <button type="button" id="btn-place-order" class="btn btn-primary btn-block btn-lg" onclick="Cart.placeOrder()">
+        Place Breakfast Order ⚡
+      </button>
+
+      <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.75rem;">
+        Pay directly at the table upon serving or via digital checkout.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

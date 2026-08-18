@@ -1,0 +1,164 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Hotel Overview & Kitchen Metrics{% endblock %}
+
+{% block content %}
+
+<!-- Stats Cards Grid -->
+<div class="stats-grid">
+  <!-- Today's Revenue -->
+  <div class="stat-card primary">
+    <div class="stat-info">
+      <span class="stat-label">Today's Sales</span>
+      <span class="stat-value">₹{{ "%.2f"|format(today_revenue) }}</span>
+    </div>
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+    </div>
+  </div>
+
+  <!-- Active Orders -->
+  <div class="stat-card warning">
+    <div class="stat-info">
+      <span class="stat-label">Live In Kitchen</span>
+      <span class="stat-value">{{ active_orders_count }}</span>
+    </div>
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+  </div>
+
+  <!-- Total Orders Today -->
+  <div class="stat-card info">
+    <div class="stat-info">
+      <span class="stat-label">Today's Orders</span>
+      <span class="stat-value">{{ today_orders_count }}</span>
+    </div>
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    </div>
+  </div>
+
+  <!-- Occupied Tables -->
+  <div class="stat-card success">
+    <div class="stat-info">
+      <span class="stat-label">Table Occupancy</span>
+      <span class="stat-value">{{ occupied_tables }} / {{ total_tables }}</span>
+    </div>
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- Layout: Recent Orders (Left) and Top Dishes (Right) -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+  
+  <!-- Left: Live Orders Queue -->
+  <div class="card" style="padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.15rem;">Recent Customer Orders</h3>
+      <a href="{{ url_for('admin.orders_board') }}" class="btn btn-sm btn-outline">
+        Open Kanban Board →
+      </a>
+    </div>
+
+    {% if recent_orders %}
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Table</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Quick Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+              <tr>
+                <td>
+                  <strong>#{{ order.order_number }}</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">{{ order.created_at }}</div>
+                </td>
+                <td>
+                  <span class="table-pill">T#{{ order.table_number }}</span>
+                </td>
+                <td>
+                  <span title="{% for it in order['items'] %}{{ it.quantity }}x {{ it.name }}, {% endfor %}">
+                    {{ order.item_count or order['items']|length }} items
+                  </span>
+                </td>
+                <td style="font-weight: 700;">₹{{ "%.2f"|format(order.total_amount) }}</td>
+                <td>
+                  <span class="badge badge-status-{{ order.status|lower }}">{{ order.status }}</span>
+                </td>
+                <td>
+                  {% if order.status == 'Placed' %}
+                    <button class="btn btn-sm btn-primary" onclick="updateOrderStatus('{{ order.id }}', 'Preparing')">
+                      Cook 🍳
+                    </button>
+                  {% elif order.status == 'Preparing' %}
+                    <button class="btn btn-sm btn-outline" style="color: #0284C7; border-color: #0284C7;" onclick="updateOrderStatus('{{ order.id }}', 'Ready')">
+                      Ready 🔔
+                    </button>
+                  {% elif order.status == 'Ready' %}
+                    <button class="btn btn-sm btn-success" onclick="updateOrderStatus('{{ order.id }}', 'Served')">
+                      Served 🍽️
+                    </button>
+                  {% else %}
+                    <span style="color: #16A34A; font-weight: 700; font-size: 0.8rem;">✓ Done</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        No customer orders placed yet today.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Right: Top Selling Breakfast Items -->
+  <div class="card" style="padding: 1.5rem; height: fit-content;">
+    <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">Top Selling Breakfast</h3>
+
+    {% if top_dishes %}
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        {% for dish in top_dishes %}
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border-bottom: 1px solid #F1F5F9;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem;">{{ dish._id }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">{{ dish.total_qty }} orders served</div>
+            </div>
+            <div style="font-weight: 800; color: var(--primary);">
+              ₹{{ "%.2f"|format(dish.total_sales) }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.85rem;">
+        Sales rankings will appear here as orders are placed.
+      </p>
+    {% endif %}
+
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+      <a href="{{ url_for('admin.menu_management') }}" class="btn btn-primary btn-block btn-sm">
+        + Add / Manage Dishes
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_orders.js') }}"></script>
+{% endblock %}

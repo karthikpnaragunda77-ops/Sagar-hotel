@@ -1,0 +1,474 @@
+/* =========================================================
+   ADMIN PORTAL STYLES (Sidebar, Dashboard, Kanban, Menu CRUD)
+   ========================================================= */
+
+.admin-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: #F8FAFC;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 260px;
+  background: #0F172A;
+  color: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid #1E293B;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-brand {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-bottom: 1px solid #1E293B;
+  color: #FFFFFF;
+}
+
+.sidebar-brand svg {
+  color: #F59E0B;
+}
+
+.sidebar-nav {
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  color: #94A3B8;
+  font-weight: 600;
+  font-size: 0.925rem;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-link:hover {
+  background: #1E293B;
+  color: #FFFFFF;
+}
+
+.sidebar-link.active {
+  background: #D97706;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+}
+
+.sidebar-footer {
+  padding: 1.25rem;
+  border-top: 1px solid #1E293B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #F1F5F9;
+}
+
+.admin-user-role {
+  font-size: 0.75rem;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+/* Main Content Area */
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-topbar {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.admin-page-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.admin-content {
+  padding: 2rem;
+  flex: 1;
+}
+
+/* Stats Cards Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.stat-card.primary::before { background: #D97706; }
+.stat-card.success::before { background: #16A34A; }
+.stat-card.warning::before { background: #F59E0B; }
+.stat-card.info::before { background: #0284C7; }
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  color: #475569;
+}
+
+.stat-card.primary .stat-icon { background: #FEF3C7; color: #D97706; }
+.stat-card.success .stat-icon { background: #DCFCE7; color: #16A34A; }
+.stat-card.warning .stat-icon { background: #FEF9C3; color: #D97706; }
+.stat-card.info .stat-icon { background: #E0F2FE; color: #0284C7; }
+
+/* Kitchen Orders Kanban Board */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.kanban-col {
+  background: #F1F5F9;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 520px;
+}
+
+.kanban-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+
+.kanban-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kanban-count {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-kanban-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  padding: 1.15rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.order-kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-number {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0F172A;
+}
+
+.order-table-tag {
+  background: #FEF3C7;
+  color: #92400E;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+.order-items-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  border-top: 1px dashed #E2E8F0;
+  border-bottom: 1px dashed #E2E8F0;
+  padding: 0.6rem 0;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.order-item-qty {
+  font-weight: 700;
+  color: #D97706;
+  margin-right: 0.25rem;
+}
+
+.order-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.order-amount {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #0F172A;
+}
+
+/* Switch Toggle (Live dish availability) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #CBD5E1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #16A34A;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Tables & QR Grid */
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.table-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.table-qr-img {
+  width: 170px;
+  height: 220px;
+  object-fit: contain;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  background: #FFFBEB;
+}
+
+/* Data Tables */
+.data-table-container {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  background: #F8FAFC;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.data-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.data-table tr:hover td {
+  background: #FAFAFA;
+}
+
+/* Print QR Sheet Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-qr-section, .printable-qr-section * {
+    visibility: visible;
+  }
+  .printable-qr-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .kanban-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-wrapper {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+  .admin-content {
+    padding: 1rem;
+  }
+}

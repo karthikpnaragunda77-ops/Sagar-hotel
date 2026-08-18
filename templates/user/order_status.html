@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.order_number }} Status{% endblock %}
+
+{% block content %}
+<div class="container tracker-container">
+
+  <!-- Order Header Card -->
+  <div class="order-header-card">
+    <div class="order-meta">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+        <span class="table-pill" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); color: #FCD34D;">
+          Table #{{ order.table_number }}
+        </span>
+        <span id="order-status-badge" class="badge badge-status-{{ order.status|lower }}">{{ order.status }}</span>
+      </div>
+      <h1>Order {{ order.order_number }}</h1>
+      <p>Placed on {{ order.created_at }} • Estimated Prep: ~{{ order.estimated_prep_time_mins or 12 }} mins</p>
+    </div>
+
+    <div>
+      <a href="{{ url_for('user.menu_view') }}" class="btn btn-outline" style="border-color: #475569; color: #F8FAFC;">
+        + Order More Items
+      </a>
+    </div>
+  </div>
+
+  <!-- Live Visual Stepper Card -->
+  <div class="stepper-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.15rem;">Live Kitchen Progress</h3>
+      <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.825rem; color: #16A34A; font-weight: 600;">
+        <span class="dot" style="width: 8px; height: 8px; background: #16A34A; border-radius: 50%; display: inline-block;"></span>
+        <span>Live Updating</span>
+      </div>
+    </div>
+
+    <!-- Stepper Indicator -->
+    <div class="stepper">
+      <div id="stepper-progress-bar" class="stepper-progress"></div>
+
+      <!-- Step 1: Placed -->
+      <div class="step-item" id="step-placed">
+        <div class="step-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </div>
+        <span class="step-label">1. Placed</span>
+      </div>
+
+      <!-- Step 2: Preparing -->
+      <div class="step-item" id="step-preparing">
+        <div class="step-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 22 4-10 4 10"/></svg>
+        </div>
+        <span class="step-label">2. Preparing</span>
+      </div>
+
+      <!-- Step 3: Ready -->
+      <div class="step-item" id="step-ready">
+        <div class="step-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <span class="step-label">3. Ready</span>
+      </div>
+
+      <!-- Step 4: Served -->
+      <div class="step-item" id="step-served">
+        <div class="step-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <span class="step-label">4. Served</span>
+      </div>
+    </div>
+
+    <!-- Live Status Message -->
+    <div id="order-status-message" style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem; font-size: 0.95rem; text-align: center; border-left: 4px solid var(--primary);">
+      <strong>Order Placed!</strong> The hotel kitchen has received your ticket.
+    </div>
+  </div>
+
+  <!-- Order Receipt / Items Breakdown -->
+  <div class="card" style="padding: 1.75rem;">
+    <h3 style="font-size: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+      Order Items Breakdown
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+      {% for item in order['items'] %}
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-weight: 700; color: var(--primary); background: var(--primary-light); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">
+              {{ item.quantity }}×
+            </span>
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem;">{{ item.name }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">₹{{ "%.2f"|format(item.price) }} each</div>
+            </div>
+          </div>
+          <div style="font-weight: 700;">₹{{ "%.2f"|format(item.subtotal) }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if order.notes %}
+      <div style="background: #FEF3C7; border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #92400E;">
+        <strong>Cooking Request:</strong> {{ order.notes }}
+      </div>
+    {% endif %}
+
+    <div style="border-top: 1px dashed var(--border-color); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.9rem;">
+      <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+        <span>Subtotal</span>
+        <span>₹{{ "%.2f"|format(order.subtotal) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+        <span>GST (5%)</span>
+        <span>₹{{ "%.2f"|format(order.tax) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; color: var(--secondary); margin-top: 0.4rem;">
+        <span>Total Paid / Payable</span>
+        <span style="color: var(--primary);">₹{{ "%.2f"|format(order.total_amount) }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/order_tracker.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new OrderTracker('{{ order.id }}', '{{ order.status }}');
+  });
+</script>
+{% endblock %}
