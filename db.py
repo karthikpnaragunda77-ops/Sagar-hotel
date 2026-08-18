@@ -1,15 +1,31 @@
 import sys
 from datetime import datetime
+
 from bson import ObjectId
-from pymongo import MongoClient, ASCENDING, DESCENDING
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+
+from pymongo import (
+    MongoClient,
+    ASCENDING,
+    DESCENDING
+)
+
+from pymongo.errors import (
+    ConnectionFailure,
+    ServerSelectionTimeoutError
+)
+
 from config import Config
 
 
 class Database:
-    _instance = None
+
     _client = None
     _db = None
+    _indexes_created = False
+
+    # =========================
+    # MongoDB Client
+    # =========================
 
     @classmethod
     def get_client(cls):
@@ -24,7 +40,7 @@ class Database:
             try:
 
                 print(
-                    "[INFO] Connecting to MongoDB Atlas...",
+                    "[INFO] Creating MongoDB Atlas client...",
                     file=sys.stderr
                 )
 
@@ -33,23 +49,17 @@ class Database:
                     **Config.MONGO_OPTIONS
                 )
 
-                # Verify connection
-                cls._client.admin.command("ping")
-
                 print(
-                    "[INFO] MongoDB connection successful.",
+                    "[INFO] MongoDB client created.",
                     file=sys.stderr
                 )
 
-            except (
-                ConnectionFailure,
-                ServerSelectionTimeoutError
-            ) as e:
+            except Exception as e:
 
                 cls._client = None
 
                 print(
-                    "[ERROR] MongoDB connection failed.",
+                    "[ERROR] Could not create MongoDB client.",
                     file=sys.stderr
                 )
 
@@ -62,6 +72,10 @@ class Database:
 
         return cls._client
 
+    # =========================
+    # Database
+    # =========================
+
     @classmethod
     def get_db(cls):
 
@@ -71,9 +85,23 @@ class Database:
 
             cls._db = client[Config.DB_NAME]
 
+            print(
+                f"[INFO] Using MongoDB database: {Config.DB_NAME}",
+                file=sys.stderr
+            )
+
+        # Create indexes only once
+        if not cls._indexes_created:
+
             cls._ensure_indexes(cls._db)
 
+            cls._indexes_created = True
+
         return cls._db
+
+    # =========================
+    # Indexes
+    # =========================
 
     @classmethod
     def _ensure_indexes(cls, db):
@@ -145,7 +173,7 @@ class Database:
             )
 
             print(
-                "[INFO] MongoDB indexes verified.",
+                "[INFO] MongoDB indexes ready.",
                 file=sys.stderr
             )
 
@@ -155,6 +183,43 @@ class Database:
                 f"[WARN] Error ensuring indexes: {e}",
                 file=sys.stderr
             )
+
+    # =========================
+    # Optional Connection Test
+    # =========================
+
+    @classmethod
+    def test_connection(cls):
+
+        try:
+
+            client = cls.get_client()
+
+            client.admin.command("ping")
+
+            print(
+                "[INFO] MongoDB Atlas connection successful.",
+                file=sys.stderr
+            )
+
+            return True
+
+        except (
+            ConnectionFailure,
+            ServerSelectionTimeoutError
+        ) as e:
+
+            print(
+                "[ERROR] MongoDB Atlas connection failed.",
+                file=sys.stderr
+            )
+
+            print(
+                f"[ERROR] {e}",
+                file=sys.stderr
+            )
+
+            return False
 
 
 # =========================
@@ -214,7 +279,7 @@ def serialize_doc(doc):
 
             result[key] = value
 
-    # Avoid Jinja/dict.items collision
+    # Prevent Jinja dict.items collision
     if (
         "items" in result
         and isinstance(result["items"], list)
